@@ -17,7 +17,7 @@ This web application runs in Docker. Docker is a platform for developing and dep
 
 2. Once you have Docker installed and open, fork this github repository and clone your forked repo.
 
-3. Inside `uw-cybersec-assetmanager > bin > redeploy.py` is a python script that will deploy and redeploy our web application. When we run it, the script will delete all old containers, images, and volumes (if specified), for our web app and rebuild them using our Docker Compose file. To deploy the web application, ensure Docker Desktop is running and in your terminal run the following command inside the directory of your cloned repository:
+3. Inside `~\ > bin > redeploy.py` is a python script that will deploy and redeploy our web application. When we run it, the script will delete all old containers, images, and volumes (if specified), for our web app and rebuild them using our Docker Compose file. To deploy the web application, ensure Docker Desktop is running and in your terminal run the following command inside the directory of your cloned repository:
     - `python .\bin\redeploy.py`
 
     You will be asked if you want to delete old volumes, select no. 
