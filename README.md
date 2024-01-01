@@ -1,6 +1,8 @@
 # Week 1 | Getting Started
 Welcome to the UW Cybersecurity Password Manager! Until now, this password manager has been used internally by you and your team for work-related password management. Your boss has decided that this password manager could make a great consumer product and would like to make it publicly available by the end of the quarter. You know that in the web application's current state, there are numerous security issues that need to be addressed before the general public can safely use this service. Over the next several weeks, you will apply what you learn in lecture to identify vulnerabilities in this web app, remediate them, and ensure that the web application maintains it's functionality. By the end of the quarter you will be left with a totally secure password manager!
 
+Feel free to use whichever IDE (integrated development environment) you prefer for this course. The teaching team will primarily be using Visual Studio Code during lab section, and all demos and examples in the lab instructions will be shown in VS Code. You can download VS Code [here](https://code.visualstudio.com/Download)!
+
 ## Docker basics
 
 This web application runs in Docker. Docker is a platform for developing and deploying applications within containers. Containers are self-sufficient units that are capable of running an application and all of it's dependencies isolated from the underlying operating system. This is extremely helpful in a development and testing environment as it allows us to run applications regardless of an end user's operating system/machine. Below is some important terminology to use moving forward:
@@ -17,7 +19,7 @@ This web application runs in Docker. Docker is a platform for developing and dep
 
 2. Once you have Docker installed and open, fork this github repository and clone your forked repo.
 
-3. Inside `~\ > bin > redeploy.py` is a python script that will deploy and redeploy our web application. When we run it, the script will delete all old containers, images, and volumes (if specified), for our web app and rebuild them using our Docker Compose file. To deploy the web application, ensure Docker Desktop is running and in your terminal run the following command inside the directory of your cloned repository:
+3. Inside `uw-cybersec-assetmanager > bin > redeploy.py` is a python script that will deploy and redeploy our web application. When we run it, the script will delete all old containers, images, and volumes (if specified), for our web app and rebuild them using our Docker Compose file. To deploy the web application, ensure Docker Desktop is running and in your terminal run the following command inside the directory of your cloned repository:
     - `python .\bin\redeploy.py`
 
     You will be asked if you want to delete old volumes, select no. 
@@ -35,11 +37,16 @@ Our three images include:
 ### Part 2: Using our web application:
 Now that we have our Docker container deployed, and we are able to see our password manager at [http://localhost:80](http://localhost:80), we can begin exploring everything that it can do!
 
-1. Once on the main page, you will be prompted to login or create an account. When you create your account, be sure to set a password you are comfortable with other people seeing (this is insecure, afterall).
+1. Once on the main page, you will be prompted to login. Since this password manager is only used by our team, it is much easier if we all use the same login credentials! This way we will never forget our login and can easily see all passwords needed for our work. It is nice to not have to worry about all that security nonsense :) Use the credentials below to login:
 
-![Create an account](/lab-writeup-imgs/create_account.png)
+```
+username: username
+password: password!
+```
 
-2. Now that you have created an account, you can login and see the password manager's homepage.
+![Create an account](/lab-writeup-imgs/login.png)
+
+2. Now that you have logged in, you should be able to see the password manager's homepage.
 
 ![Password Manager Homepage](/lab-writeup-imgs/password_manager_homepage.png)
 
@@ -65,4 +72,4 @@ For this assignment, think of a situation or system you can potentially "hack". 
 
 ## Part 2: Updating the Password Manager
 
-Along with the Hacker Mindset writeup, please create a new vault in the password manager for your "personal passwords" and update it with some logins you use daily. Please DO NOT use your actual passwords for this part of the lab, just make up some login credentials. Submit a screenshot of your new personal password vault!
+Along with the Hacker Mindset writeup, please create a new vault in the password manager for the security team (your team!) and update it with some logins that your team may use. Please DO NOT use your actual passwords for this part of the lab, just make up some login credentials. Submit a screenshot of your new security password vault!
