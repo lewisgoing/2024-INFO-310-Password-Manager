@@ -114,48 +114,57 @@ if (!$resultPasswords) {
 
 <div class="container mt-4">
     <h2><?php echo $vaultName; ?> Vault Passwords</h2>
-    
-        <!-- Add button to open a modal for adding a new password -->
     <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#addPasswordModal">
         Add Password
     </button>
-    <!-- Table to display passwords -->
     <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search for passwords..." class="form-control mb-3">
     <table class="table table-bordered" id="passwordTable">
         <thead>
-        <tr>
-            
-            <th>Username</th>
-            <th>Website</th>
-            <th>Password</th>
-            <th>Notes</th>
-            <th>Actions</th>
-        </tr>
+            <tr>
+                <th>Username</th>
+                <th>Website</th>
+                <th>Password</th>
+                <th>Notes</th>
+                <th>Actions</th>
+            </tr>
         </thead>
         <tbody>
-        <?php while ($rowPassword = $resultPasswords->fetch_assoc()) : ?>
-            <tr data-password-id="<?php echo $rowPassword['password_id']; ?>">                
-                <td><?php echo $rowPassword['username']; ?></td>
-                <td><?php echo $rowPassword['website']; ?></td>
-                <td type="password">
-                    <details>
-                        <summary class="btn btn-primary btn-sm" data-toggle="modal">Show Password</summary><br>
-                        <?php echo $rowPassword['password']; ?>
-                    </details>
-                </td>
-                <td><?php echo $rowPassword['notes']; ?></td>
-                <td>
-                    <!-- Edit button to open a modal for editing a password -->
-                    <button class="btn btn-warning btn-sm edit-password-btn" data-toggle="modal" data-target="#editPasswordModal" data-password-notes="<?php echo $rowPassword['notes']; ?>" data-password-password="<?php echo $rowPassword['password']; ?>"  data-password-website="<?php echo $rowPassword['website']; ?>" data-password-username="<?php echo $rowPassword['username']; ?>" data-password-id="<?php echo $rowPassword['password_id']; ?>">Edit</button>
-
-                    <!-- Delete button to open a modal for deleting a password -->
-                    <button class="btn btn-danger btn-sm delete-password-btn" data-toggle="modal" data-target="#deletePasswordModal" data-password-id="<?php echo $rowPassword['password_id']; ?>">Delete</button>
-                </td>
-            </tr>
-        <?php endwhile; ?>
+            <?php while ($rowPassword = $resultPasswords->fetch_assoc()) : ?>
+                <tr data-password-id="<?php echo $rowPassword['password_id']; ?>">                
+                    <td><?php echo $rowPassword['username']; ?></td>
+                    <td><?php echo $rowPassword['website']; ?></td>
+                    <td>
+                        <input type="password" class="password-field" value="<?php echo $rowPassword['password']; ?>" disabled>
+                    </td>
+                    <td><?php echo $rowPassword['notes']; ?></td>
+                    <td>
+                        <button class="btn btn-primary btn-sm show-password-btn">Show Password</button>
+                        <button class="btn btn-warning btn-sm edit-password-btn" data-toggle="modal" data-target="#editPasswordModal" data-password-notes="<?php echo $rowPassword['notes']; ?>" data-password-password="<?php echo $rowPassword['password']; ?>" data-password-website="<?php echo $rowPassword['website']; ?>" data-password-username="<?php echo $rowPassword['username']; ?>" data-password-id="<?php echo $rowPassword['password_id']; ?>">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-password-btn" data-toggle="modal" data-target="#deletePasswordModal" data-password-id="<?php echo $rowPassword['password_id']; ?>">Delete</button>
+                    </td>
+                </tr>
+            <?php endwhile; ?>
         </tbody>
     </table>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var showPasswordButtons = document.querySelectorAll('.show-password-btn');
+        showPasswordButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                var passwordField = button.closest('tr').querySelector('.password-field');
+                passwordField.type = (passwordField.type === 'password') ? 'text' : 'password';
+                if (button.textContent == 'Show Password') {
+                    button.textContent = 'Hide Password';
+                } else {
+                    button.textContent = 'Show Password';
+                }
+            });
+        });
+    });
+</script>
+
 
 
 
