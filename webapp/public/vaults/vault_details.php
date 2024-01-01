@@ -137,7 +137,12 @@ if (!$resultPasswords) {
             <tr data-password-id="<?php echo $rowPassword['password_id']; ?>">                
                 <td><?php echo $rowPassword['username']; ?></td>
                 <td><?php echo $rowPassword['website']; ?></td>
-                <td type="password"  ><?php echo $rowPassword['password'];  ?></td>
+                <td type="password">
+                    <details>
+                        <summary class="btn btn-primary btn-sm" data-toggle="modal">Show Password</summary><br>
+                        <?php echo $rowPassword['password']; ?>
+                    </details>
+                </td>
                 <td><?php echo $rowPassword['notes']; ?></td>
                 <td>
                     <!-- Edit button to open a modal for editing a password -->

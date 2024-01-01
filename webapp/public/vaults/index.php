@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['deleteVaultId']) && !
     $deleteVaultId = $_POST['deleteVaultId'];
 
     $query = "DELETE FROM vaults WHERE vault_id = $deleteVaultId";
-  
+
     $result = $conn->query($query);
 
     if (!$result) {
@@ -79,6 +79,7 @@ if (!$result) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -86,134 +87,144 @@ if (!$result) {
     <!-- Add Bootstrap CSS link here -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
+
 <body>
 
 <?php include '../components/nav-bar.php';?>
 
-<div class="container mt-4">
-    <h2>Password Vaults</h2>
+    <div class="container mt-4">
+        <h2>Password Vaults</h2>
 
-    <!-- Add button to open a modal for adding a new vault -->
-    <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#addVaultModal">
-        Add Vault
-    </button>
+        <!-- Add button to open a modal for adding a new vault -->
+        <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#addVaultModal">
+            Add Vault
+        </button>
 
-    <!-- Table to display vaults -->
-    <table class="table">
-        <thead>
-        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search for vaults..." class="form-control mb-3">
-        <table class="table table-bordered" id="vaultTable">
+        <!-- Table to display vaults -->
+        <table class="table">
             <thead>
-                <tr>
-                <th>Vault Name</th>            
-                <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-        <tbody>
-        
-        <?php while ($row = $result->fetch_assoc()) : ?>
-            <tr data-vault-id="<?php echo $row['vault_id']; ?>" class="vault-row" data-href="vault_details.php?vault_id=<?php echo $row['vault_id']; ?>">
-        <td><?php echo $row['vault_name']; ?></td>
-        <td>
-            <!-- Edit button to open a modal for editing a vault -->
-            <button class="btn btn-warning btn-sm edit-btn" data-toggle="modal" data-target="#editVaultModal" data-vault-name="<?php echo $row['vault_name']; ?>" data-vault-id="<?php echo $row['vault_id']; ?>">Edit</button>
-            
-            <!-- Delete button to open a modal for deleting a vault -->
-            <button class="btn btn-danger btn-sm delete-btn" data-toggle="modal" data-target="#deleteVaultModal" data-vault-name="<?php echo $row['vault_name']; ?>"  data-vault-id="<?php echo $row['vault_id']; ?>">Delete</button>
-        </td>
-    </tr>
-        <?php endwhile; ?>
-        </tbody>
-    </table>
-</div>
+                <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search for vaults..."
+                    class="form-control mb-3">
+                <table class="table table-bordered" id="vaultTable">
+                    <thead>
+                        <tr>
+                            <th>Vault Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tbody>
 
-<!-- Modal for adding a new vault -->
-<div class="modal" id="addVaultModal">
-<div class="modal-dialog">
-        <div class="modal-content">
+                        <?php while ($row = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td>
+                                    <?php echo $row['vault_name']; ?>
+                                </td>
+                                <td>
+                                    <a href="vault_details.php?vault_id=<?php echo $row['vault_id']; ?>" class="btn btn-primary btn-sm" role="button" aria-disabled="true">View Vault</a>
+                                
+                                    <!-- Edit button to open a modal for editing a vault -->
+                                    <button class="btn btn-warning btn-sm edit-btn" data-toggle="modal"
+                                        data-target="#editVaultModal" data-vault-name="<?php echo $row['vault_name']; ?>"
+                                        data-vault-id="<?php echo $row['vault_id']; ?>">Edit</button>
 
-            <!-- Modal Header -->
-            <div class="modal-header">
-                <h4 class="modal-title">Add New Vault</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <!-- Delete button to open a modal for deleting a vault -->
+                                    <button class="btn btn-danger btn-sm delete-btn" data-toggle="modal"
+                                        data-target="#deleteVaultModal" data-vault-name="<?php echo $row['vault_name']; ?>"
+                                        data-vault-id="<?php echo $row['vault_id']; ?>">Delete</button>
+                                </td>   
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+    </div>
+
+    <!-- Modal for adding a new vault -->
+    <div class="modal" id="addVaultModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Add New Vault</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <!-- Add form for adding a new vault here -->
+                    <form method="POST" id="addVaultForm">
+                        <div class="form-group">
+                            <label for="vaultName">Vault Name:</label>
+                            <input type="text" class="form-control" id="vaultName" name="vaultName" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Vault</button>
+                    </form>
+                </div>
+
             </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body">
-                <!-- Add form for adding a new vault here -->
-                <form method="POST" id="addVaultForm">
-                    <div class="form-group">
-                        <label for="vaultName">Vault Name:</label>
-                        <input type="text" class="form-control" id="vaultName" name="vaultName" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Add Vault</button>
-                </form>
-            </div>
-
         </div>
     </div>
-</div>
 
-<!-- Modal for editing a vault -->
-<div class="modal" id="editVaultModal">
-<div class="modal-dialog">
-        <div class="modal-content">
+    <!-- Modal for editing a vault -->
+    <div class="modal" id="editVaultModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
 
-            <!-- Modal Header -->
-            <div class="modal-header">
-                <h4 class="modal-title">Edit Vault</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Vault</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <!-- Add form for editing a vault here -->
+                    <form method="POST" id="editVaultForm">
+                        <div class="form-group">
+                            <input type="hidden" id="editVaultId" name="editVaultId">
+                            <label for="editVaultName">Vault Name:</label>
+                            <input type="text" class="form-control" id="editVaultName" name="editVaultName" required>
+                        </div>
+                        <button type="submit" class="btn btn-warning">Update Vault</button>
+                    </form>
+                </div>
+
             </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body">
-                <!-- Add form for editing a vault here -->
-                <form method="POST" id="editVaultForm">
-                    <div class="form-group">                    
-                        <input type="hidden" id="editVaultId" name="editVaultId">
-                        <label for="editVaultName">Vault Name:</label>
-                        <input type="text" class="form-control" id="editVaultName" name="editVaultName" required>
-                    </div>
-                    <button type="submit" class="btn btn-warning">Update Vault</button>
-                </form>
-            </div>
-
         </div>
     </div>
-</div>
 
-<!-- Modal for deleting a vault -->
-<div class="modal" id="deleteVaultModal">
-<div class="modal-dialog">
-        <div class="modal-content">
+    <!-- Modal for deleting a vault -->
+    <div class="modal" id="deleteVaultModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
 
-            <!-- Modal Header -->
-            <div class="modal-header">
-                <h4 class="modal-title">Delete Vault</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Delete Vault</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <p id="deleteWarningPara"></p>
+                    <!-- Add hidden input for vault ID -->
+                    <form method="POST" id="deleteVaultForm">
+                        <input type="hidden" id="deleteVaultId" name="deleteVaultId">
+                        <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                    </form>
+                </div>
+
             </div>
-
-            <!-- Modal Body -->
-            <div class="modal-body">
-                <p id="deleteWarningPara"></p>
-                <!-- Add hidden input for vault ID -->
-                <form method="POST" id="deleteVaultForm">
-                    <input type="hidden" id="deleteVaultId" name="deleteVaultId">
-                    <button type="submit" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
-                </form>
-            </div>
-
         </div>
     </div>
-</div>
 
-<!-- Add Bootstrap JS and Popper.js scripts here -->
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-<!-- Add your custom JavaScript script for handling modals, filtering, and row click redirection -->
-<script>    
+    <!-- Add Bootstrap JS and Popper.js scripts here -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!-- Add your custom JavaScript script for handling modals, filtering, and row click redirection -->
+    <script>
         function searchTable() {
             var input, filter, table, tr, td, i, txtValue;
             input = document.getElementById("searchInput");
@@ -234,48 +245,34 @@ if (!$result) {
             }
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-    // Make only the first td in each row clickable
-    var rows = document.querySelectorAll('.vault-row');
-    rows.forEach(function(row) {
-        var firstTd = row.querySelector('td:first-child');
-        if (firstTd) {
-            firstTd.addEventListener('click', function() {
-                var href = row.getAttribute('data-href');
-                if (href) {
-                    window.location.href = href;
-                }
+
+        // Handle edit button click
+        var editButtons = document.querySelectorAll('.edit-btn');
+        editButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                var vaultId = button.getAttribute('data-vault-id');
+                var vaultName = button.getAttribute('data-vault-name');
+                // You can use vaultId to populate the edit modal, if needed
+                document.getElementById('editVaultId').value = vaultId;
+                document.getElementById('editVaultName').value = vaultName;
             });
-        }
-    });
-
-    // Handle edit button click
-    var editButtons = document.querySelectorAll('.edit-btn');
-    editButtons.forEach(function(button) {
-        button.addEventListener('click', function() {
-            var vaultId = button.getAttribute('data-vault-id');
-            var vaultName = button.getAttribute('data-vault-name');
-            // You can use vaultId to populate the edit modal, if needed
-            document.getElementById('editVaultId').value = vaultId;
-            document.getElementById('editVaultName').value = vaultName;
         });
-    });
 
-    // Handle delete button click
-    var deleteButtons = document.querySelectorAll('.delete-btn');
-    deleteButtons.forEach(function(button) {
-        button.addEventListener('click', function() {
-            var vaultId = button.getAttribute('data-vault-id');
-            var vaultName = button.getAttribute('data-vault-name');
-            // You can use vaultId to populate the delete modal, if needed
-           
-             document.getElementById('deleteVaultId').value = vaultId;
-             document.getElementById('deleteWarningPara').innerText =  'Are you sure you want to delete the ' + vaultName + ' vault?';             
+        // Handle delete button click
+        var deleteButtons = document.querySelectorAll('.delete-btn');
+        deleteButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                var vaultId = button.getAttribute('data-vault-id');
+                var vaultName = button.getAttribute('data-vault-name');
+                // You can use vaultId to populate the delete modal, if needed
+
+                document.getElementById('deleteVaultId').value = vaultId;
+                document.getElementById('deleteWarningPara').innerText = 'Are you sure you want to delete the ' + vaultName + ' vault?';
+            });
         });
-    });
 });
 
-</script>
+    </script>
 </body>
 
 </html>
