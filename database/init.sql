@@ -71,8 +71,7 @@ VALUES
 -- and jane_smith:'ihatemyjob'
 INSERT INTO users (user_id, username, first_name, last_name, email, password)
 VALUES
-    (1, 'john_doe', 'John', 'Doe', 'john.doe@example.com', 'thisismysecret'),
-    (2, 'jane_smith', 'Jane', 'Smith', 'jane.smith@example.com', 'ihatemyjob');
+    (1, 'username', 'User', 'Name', 'user@info310.net', 'password!');
 
 
 -- Insert sample vaults
