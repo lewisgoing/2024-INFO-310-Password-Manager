@@ -270,7 +270,6 @@ if (!$result) {
                 document.getElementById('deleteWarningPara').innerText = 'Are you sure you want to delete the ' + vaultName + ' vault?';
             });
         });
-});
 
     </script>
 </body>
