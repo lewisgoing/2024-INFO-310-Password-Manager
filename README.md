@@ -1,6 +1,15 @@
 # Week 3 | Cryptography
 Cryptography plays a crucial role in cybersecurity by safeguarding the confidentiality, integrity, and availability of information, aligning with the principles of the CIA triad. Through the use of cryptographic techniques, sensitive data can be encrypted, rendering it unreadable to unauthorized individuals and ensuring confidentiality. The utilization of encryption also contributes to the availability of services by preventing disruptions and unauthorized access. By incorporating cryptographic measures, cybersecurity strategies can establish a robust defense against a range of threats, providing a foundation for secure communication, data storage, and overall information protection.
 
+To get access to the new branch after forking the repo, enter the following commands:
+```
+git remote add OriginalRepo https://github.com/uw-areifers/2024-INFO-310-Password-Manager
+git fetch OriginalRepo
+git checkout basic_encryption
+git push
+
+```
+
 ## Part 0: Completing MiTM attack
 In the last lab assignment, we attempted to view each other's network traffic by performing a MiTM attack. If you struggled to complete that lab, or were unable to do so with three members, please take time at the beginning of this lab to complete that portion.
 
@@ -63,7 +72,7 @@ Our certificate will contain our websites public key, which clients can use to e
 3. In the terminal, enter the following command to generate your certificate and key:
 
     ```
-    openssl req -newkey rsa:2048 -nodes -keyout localhost.key -subj "/C=US/ST=WA/L=SEA/O=UW/CN=localhost" -out localhost.csr
+    openssl req -newkey rsa:2048 -nodes -keyout localhost.key -subj "/C=US/ST=WA/L=SEA/O=UW/CN=localhost/OU=iSchool" -out localhost.csr
     ```
     - Let's understand what each part of this command means:
 
@@ -71,12 +80,13 @@ Our certificate will contain our websites public key, which clients can use to e
         - `-newkey rsa:2048`: This option specifies that a new RSA private key should be generated. The key will have a length of 2048 bits.
         - `-nodes`: This flag is used to indicate that the key should not be encrypted with a passphrase. We will use this flag so that we don't have to enter a password every time we spin up our docker container.
         - `-keyout localhost.key`: This specifies that the filename where the generated private key should be saved. In this case, 'localhost.key'.
-        - `-subj "/C=US/ST=WA/L=SEA/O=UW/CN=localhost"`: This portion sets the subject, which is the information about the entity the certificate is for. This is important for the certificate signing request, so that the issuer signing the cert knows who it belongs to.
+        - `-subj "/C=US/ST=WA/L=SEA/O=UW/CN=localhost/OU=iSchool"`: This portion sets the subject, which is the information about the entity the certificate is for. This is important for the certificate signing request, so that the issuer signing the cert knows who it belongs to.
             - `C=US`: Country = United States
             - `ST=WA`: State = Washington
             - `L=SEA`: Locality = Seattle
             - `O=UW`: Organization = University of Washington
             - `CN=localhost`: Common Name = localhost (the domain the certificate is for)
+            - `OU=iSchool`: Organizational Unit = iSchool
         - `-out localhost.csr`: Finally, this flag specifies the name of the file where our certificate signing request will be saved, in this case 'localhost.csr'
 
 4. Now that we have our certificate signing request saved to `localhost.csr`, we need our certificate authority to provide us a signed cert. We have created a CA, `INFO310-RootCA`, who's certificate and key is saved in the `./certs` directory.
