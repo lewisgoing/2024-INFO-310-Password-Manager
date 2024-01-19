@@ -1,15 +1,6 @@
 # Week 3 | Cryptography
 Cryptography plays a crucial role in cybersecurity by safeguarding the confidentiality, integrity, and availability of information, aligning with the principles of the CIA triad. Through the use of cryptographic techniques, sensitive data can be encrypted, rendering it unreadable to unauthorized individuals and ensuring confidentiality. The utilization of encryption also contributes to the availability of services by preventing disruptions and unauthorized access. By incorporating cryptographic measures, cybersecurity strategies can establish a robust defense against a range of threats, providing a foundation for secure communication, data storage, and overall information protection.
 
-To get access to the new branch after forking the repo, enter the following commands:
-```
-git remote add OriginalRepo https://github.com/uw-areifers/2024-INFO-310-Password-Manager
-git fetch OriginalRepo
-git checkout basic_encryption
-git push
-
-```
-
 ## Part 0: Completing MiTM attack
 In the last lab assignment, we attempted to view each other's network traffic by performing a MiTM attack. If you struggled to complete that lab, or were unable to do so with three members, please take time at the beginning of this lab to complete that portion.
 
