@@ -35,7 +35,7 @@
 <!-- Footer -->
 <footer class="footer mt-5 py-3 bg-dark text-white">
     <div class="container text-center">
-        <span>&copy; 2023 Asset Tracker. All rights reserved.</span>
+        <span>&copy; 2023 UW Cybersecurity Password Manager. All rights reserved.</span>
     </div>
 </footer>
 

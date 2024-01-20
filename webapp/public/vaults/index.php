@@ -7,13 +7,11 @@ $username = 'user';
 $password = 'supersecretpw';
 $database = 'password_manager';
 
-
 $conn = new mysqli($hostname, $username, $password, $database);
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-
 
 // Add Vault
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vaultName'])) {
@@ -270,6 +268,7 @@ if (!$result) {
                 document.getElementById('deleteWarningPara').innerText = 'Are you sure you want to delete the ' + vaultName + ' vault?';
             });
         });
+});
 
     </script>
 </body>

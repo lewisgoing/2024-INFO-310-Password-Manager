@@ -1,16 +1,27 @@
 <?php
 
-$servername = "mysql-database";
-$username = "user";
-$password = "supersecretpw";
-$dbname = "password_manager";
+session_start();
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+include './components/loggly-logger.php';
+
+$hostname = 'mysql-database';
+$username = 'user';
+$password = 'supersecretpw';
+$database = 'password_manager';
+
+
+$conn = new mysqli($hostname, $username, $password, $database);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 
 unset($error_message);
 
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    $errorMessage = "Connection failed: " . $conn->connect_error;
+    $logger->error($errorMessage); // Log the error
+    die($errorMessage);
 }
 
 // Check if the form is submitted
@@ -18,16 +29,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $username = $_POST['username'];
     $password = $_POST['password'];
-    
+
     $sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
     $result = $conn->query($sql);
 
     if($result->num_rows > 0) {
-        setcookie('authenticated', $username, time() + 3600, '/');
+       
+        $userFromDB = $result->fetch_assoc();
+
+        $_SESSION['authenticated'] = $username;
+
+        
+        if ($userFromDB['default_role_id'] == 1)
+        {        
+            setcookie('isSiteAdministrator', true, time() + 3600, '/');                
+        } else {
+            unset($_COOKIE['isSiteAdministrator']); 
+            setcookie('isSiteAdministrator', '', -1, '/'); 
+        }
+
         header("Location: index.php");
         exit();
     } else {
         $error_message = 'Invalid username or password.';
+        $logger->warning("Login failed for username: $username"); // Log login failure
     }
 
     $conn->close();
