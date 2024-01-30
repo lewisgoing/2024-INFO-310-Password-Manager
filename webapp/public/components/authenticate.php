@@ -1,8 +1,9 @@
 <?php
 
-if (!isset($_COOKIE['authenticated']) || !$_COOKIE['authenticated']) {
-    header('Location: login.php');
-    exit();
-}
+session_start();
 
+if (!isset($_COOKIE['authenticated'])) {
+    header('Location: /login.php');
+    exit;
+}
 ?>

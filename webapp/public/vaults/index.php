@@ -1,6 +1,7 @@
 <?php
 
 include '../components/authenticate.php';
+include '../components/loggly-logger.php';
 
 $hostname = 'mysql-database';
 $username = 'user';
@@ -10,7 +11,9 @@ $database = 'password_manager';
 $conn = new mysqli($hostname, $username, $password, $database);
 
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    $logger->error("Connection failed: " . $conn->connect_error);
+    die('A fatal error occurred and has been logged.');
+    //die("Connection failed: " . $conn->connect_error);
 }
 
 // Add Vault
@@ -22,8 +25,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vaultName'])) {
     $result = $conn->query($query);
 
     if (!$result) {
-        die("Error adding vault: " . $conn->error);
+        $logger->error("Error adding vault: " . $conn->error);
+        die('A fatal error occurred and has been logged.');
+        // die("Error adding vault: " . $conn->error);
     }
+
+    // Retrieve the ID of the inserted vault
+    $insertedVaultId = $conn->insert_id;
+
+    // We need to fetch the user_id based off the username in order to complete the permission insert, we are going to default to Owner for the role so we can hardcode that without looking it up
+
+    $user = $_COOKIE['authenticated'];
+    $queryFetchUserId = "SELECT user_id FROM users WHERE username = '$user'";
+    $resultFetchUserId = $conn->query($queryFetchUserId);
+
+    if ($resultFetchUserId && $resultFetchUserId->num_rows > 0) {
+        // Fetch user_id from the result set
+        $row = $resultFetchUserId->fetch_assoc();
+        $userId = $row['user_id'];
+        $roleId = 1;
+    
+        // If user_id is found, insert the permission
+        $queryInsertPermission = "INSERT INTO vault_permissions (user_id, vault_id, role_id) VALUES ($userId, $insertedVaultId, $roleId)";
+        $resultInsertPermission = $conn->query($queryInsertPermission);
+    
+        if (!$resultInsertPermission) {
+            $logger->error("Error adding permission, Query : " .  $queryInsertPermission . " Error Info : " . $conn->error);
+          //  die("Error adding permission, Query : " .  $queryInsertPermission . " Error Info : " . $conn->error);
+            die('A fatal error occurred while adding permission.');
+        } else {
+            $logger->info( "Permission added successfully!");
+        }
+    } else {
+        die("User with username '$user' not found.");
+    }
+
+    $logger->info('Vault Added', ['vault' => $vaultName, 'added_by' => $_COOKIE['authenticated']]);
 
     // Redirect to the current page after adding the vault
     header("Location: {$_SERVER['PHP_SELF']}");
@@ -39,8 +76,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editVaultName']) && i
     $result = $conn->query($query);
 
     if (!$result) {
-        die("Error editing vault: " . $conn->error);
+        $logger->error("Error editing vault: " . $conn->error);
+        die('A fatal error occurred and has been logged.');
+        // die("Error editing vault: " . $conn->error);
     }
+    
+    $logger->info('Vault Edited', ['vault_id' => $editVaultId, 'edited_by' => $_COOKIE['authenticated']]);
 
     // Redirect to the current page after editing the vault
     header("Location: {$_SERVER['PHP_SELF']}");
@@ -56,18 +97,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['deleteVaultId']) && !
     $result = $conn->query($query);
 
     if (!$result) {
-        die("Error deleting vault: " . $conn->error);
+        $logger->error("Error deleting vault: " . $conn->error);
+        die('A fatal error occurred and has been logged.');
+        //die("Error deleting vault: " . $conn->error);
     }
+
+    $logger->info('Vault Deleted', ['vault_id' => $deleteVaultId, 'deleted_by' => $_COOKIE['authenticated']]);
 
     // Redirect to the current page after deleting the vault
     header("Location: {$_SERVER['PHP_SELF']}");
     exit();
 }
 
-
 // Retrieve vaults from the database
-$query = "SELECT vaults.vault_id, vaults.vault_name
-          FROM vaults";
+if($_COOKIE['isSiteAdministrator'] == true){
+    $query =  "SELECT vaults.vault_id, vaults.vault_name
+               FROM vaults";
+}else{
+    $query = "SELECT vaults.vault_id, vaults.vault_name
+    FROM vaults, vault_permissions, users
+    WHERE vaults.vault_id = vault_permissions.vault_id
+    AND vault_permissions.user_id = users.user_id
+    AND users.username = '" . $_COOKIE['authenticated'] . "'";
+}
+
+
 $result = $conn->query($query);
 
 if (!$result) {
@@ -268,7 +322,7 @@ if (!$result) {
                 document.getElementById('deleteWarningPara').innerText = 'Are you sure you want to delete the ' + vaultName + ' vault?';
             });
         });
-});
+
 
     </script>
 </body>

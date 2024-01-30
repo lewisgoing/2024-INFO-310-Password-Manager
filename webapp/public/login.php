@@ -9,7 +9,7 @@ $username = 'user';
 $password = 'supersecretpw';
 $database = 'password_manager';
 
-
+$logger->debug('Login page called');
 $conn = new mysqli($hostname, $username, $password, $database);
 
 if ($conn->connect_error) {
@@ -37,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
        
         $userFromDB = $result->fetch_assoc();
 
+        //$_COOKIE['authenticated'] = $username;
         setcookie('authenticated', $username, time() + 3600, '/');     
 
         if ($userFromDB['default_role_id'] == 1)
@@ -46,7 +47,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             unset($_COOKIE['isSiteAdministrator']); 
             setcookie('isSiteAdministrator', '', -1, '/'); 
         }
-
         header("Location: index.php");
         exit();
     } else {
@@ -87,6 +87,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">Login</button>
             </form>
+            <div class="mt-3 text-center">
+                <a href="./users/create_account.php" class="btn btn-secondary btn-block">Create an Account</a>
+            </div>
         </div>
     </div>
 </body>

@@ -11,5 +11,5 @@ $logglyToken = $_ENV["LOGGLY_TOKEN"];
 $logger = new Logger('UW Password Manager');
 $logger->pushHandler(new LogglyHandler($logglyToken.'/tag/monolog', Logger::INFO));
 
-$logger->info('Loggly Sending Informational Message');
+$logger->info('Loggly Sending Infomational Message');
 ?>

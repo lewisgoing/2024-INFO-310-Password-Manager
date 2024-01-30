@@ -1,4 +1,4 @@
-FROM php:7.4.33-fpm-alpine as webapp
+FROM php:7.4.33-fpm-alpine as php-server
 
 # Useful PHP extension installer image, copy binary into your container
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
@@ -30,6 +30,8 @@ RUN composer install --prefer-dist --no-dev --no-scripts --no-progress --no-inte
 
 # copy application files to the working directory
 COPY ./webapp .
+
+RUN chmod 777 /var/www/html/public/vaults/uploads
 
 # run composer dump-autoload --optimize
 RUN composer dump-autoload --optimize
