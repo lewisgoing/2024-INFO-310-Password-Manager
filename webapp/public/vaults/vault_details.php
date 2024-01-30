@@ -26,7 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addUsername']) && iss
     $resultAddPassword = $conn->query($queryAddPassword);
 
     if (!$resultAddPassword) {
-        die("Error adding password: " . $conn->error);
+
+        die('Error adding password: $queryAddPassword: ' .  $queryAddPassword . ' Error : ' .  $conn->error);
     }
 
     // Redirect to the current page after adding the password

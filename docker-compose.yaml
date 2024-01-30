@@ -33,6 +33,6 @@ services:
             MYSQL_PASSWORD: "${MYSQL_PASSWORD}"
             MYSQL_DATABASE: "${MYSQL_DATABASE}"
         ports:
-            - "3306:3306"
+            - "3360:3360"
 volumes:
     mysqldata:
