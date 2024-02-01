@@ -5,6 +5,7 @@ $username = 'user';
 $password = 'supersecretpw';
 $database = 'password_manager';
 
+include '../components/loggly-logger.php';
 
 $conn = new mysqli($hostname, $username, $password, $database);
 
@@ -28,6 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addUsername']) && iss
     if (!$resultAddPassword) {
         die("Error adding password: " . $conn->error);
     }
+
+    $logger->info("Password added to Vault $vaultId"); // Log for adding password.
 
     // Redirect to the current page after adding the password
     header("Location: {$_SERVER['PHP_SELF']}?vault_id=$vaultId");
@@ -53,6 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'  && isset($_POST['editPasswordId']) &&
         die("Error updating password: " . $conn->error);
     }
 
+    $logger->info("Password $editPasswordId has been modified."); // Log for editing password.
+
     // Redirect to the current page after updating the password
     header("Location: {$_SERVER['PHP_SELF']}?vault_id=$vaultId");
     exit();
@@ -69,6 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['deletePasswordId']) &
     if (!$resultDeletePassword) {
         die("Error deleting password: " . $conn->error);
     }
+
+    $logger->info("Password $deletePasswordId has been deleted from vault $vaultId"); // Log for deleting password.
 
     // Redirect to the current page after deleting the password
     header("Location: {$_SERVER['PHP_SELF']}?vault_id=$vaultId");
