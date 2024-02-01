@@ -295,10 +295,19 @@ Clearly these cookies aren't working. We were able to implement secure authentic
     ?>
     ```
 
-3. We also need to make sure we remove the `authenticated` key from the session when a user logs out. To do this we can update out `logout.php` script.
-
-    - In the `logout.php` script, replace every instance of `_COOKIE` with `_SESSION`. Be sure to also delete the `setCookie` lines!
+3. We also need to make sure when an Admin logs out, it removes the `isSiteAdministrator` key from our session ID. To do this, replace the following lines of code in `logout.php`:
     
+    ```
+    unset($_COOKIE['isSiteAdministrator']); 
+    setcookie('isSiteAdministrator', '', -1, '/'); 
+    ```
+
+    with this single line:
+
+    ```
+    unset($_SESSION['isSiteAdministrator']); 
+    ```
+
     - Yor logout.php script should look like the following:
 
     ```
@@ -312,6 +321,30 @@ Clearly these cookies aren't working. We were able to implement secure authentic
 
     ?>
     ```
+
+4. Finally, when a user creates a vault, the web application will read our cookie and set the current username as the vault's owner. We can change this in our SQL query in `vault-details.php` that is run when we add create a vault to use our session instead! To do this, replace the following code in `vault-details.php`:
+
+    ```
+    $queryVaultOwner = "SELECT *
+                FROM vault_permissions, users
+                WHERE vault_permissions.vault_id = $vaultId
+                AND vault_permissions.role_id = 1
+                AND vault_permissions.user_id = users.user_id
+                AND users.username = '" . $_COOKIE['authenticated'] . "'";
+    ```
+
+    with this code to use session ID instead:
+
+    ```
+    $queryVaultOwner = "SELECT *
+                FROM vault_permissions, users
+                WHERE vault_permissions.vault_id = $vaultId
+                AND vault_permissions.role_id = 1
+                AND vault_permissions.user_id = users.user_id
+                AND users.username = '" . $_SESSION['authenticated'] . "'";
+    ```
+
+### As a final check, you can click Edit > Find in Files and search '_COOKIE' and replace every instance with '_SESSION' (outside of the README.md file)
 ## For Credit
 
 Congratulations on implementing secure session management! Take a screenshot of you accessing the admin panel as your own personal user account, as well as your updated code from the `login.php` and `logout.php`.
