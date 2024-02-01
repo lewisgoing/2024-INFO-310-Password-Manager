@@ -209,25 +209,13 @@ We can use `PHPSESSID` to manage the authentication and authorization for our we
 5. Finally, we need to update our nav bar component to read the username from our session instead of the cookie. In `nav-bar.php`, update the following code:
 
     ```
-    if (isset($_COOKIE['isSiteAdministrator']) && $_COOKIE['isSiteAdministrator'] == true) {
-        ?>
-        <li class="nav-item">
-            <a class="nav-link" href="/users/">Users</a>
-        </li>
-        <?php
-    }
+    <?php echo "Welcome " . $_COOKIE['authenticated'] ?>
     ```
 
     to use our session ID instead:
 
     ```
-    if (isset($_COOKIE['isSiteAdministrator']) && $_SESSION['isSiteAdministrator'] == true) {
-        ?>
-        <li class="nav-item">
-            <a class="nav-link" href="/users/">Users</a>
-        </li>
-        <?php
-    }
+    <?php echo "Welcome " . $_SESSION['authenticated'] ?>
     ```
 
 ## Part 4: Breaking Authorization
@@ -322,7 +310,7 @@ Clearly these cookies aren't working. We were able to implement secure authentic
     ?>
     ```
 
-4. Finally, when a user creates a vault, the web application will read our cookie and set the current username as the vault's owner. We can change this in our SQL query in `vault-details.php` that is run when we add create a vault to use our session instead! To do this, replace the following code in `vault-details.php`:
+4. Next, when a user creates a vault, the web application will read our cookie and set the current username as the vault's owner. We can change this in our SQL query in `vault-details.php` that is run when we add create a vault to use our session instead! To do this, replace the following code in `vault-details.php`:
 
     ```
     $queryVaultOwner = "SELECT *
@@ -344,7 +332,55 @@ Clearly these cookies aren't working. We were able to implement secure authentic
                 AND users.username = '" . $_SESSION['authenticated'] . "'";
     ```
 
-### As a final check, you can click Edit > Find in Files and search '_COOKIE' and replace every instance with '_SESSION' (outside of the README.md file)
+5. Finally, we should also update the `nav_bar.php` component to check our session ID to decide if it should display the admin panel or not. To do this update the following code in `nav_bar.php`:
+
+    ```
+    <?php
+        if (isset($_COOKIE['isSiteAdministrator']) && $_COOKIE['isSiteAdministrator'] == true) {
+            ?>
+            <li class="nav-item">
+                <a class="nav-link" href="/users/">Users</a>
+            </li>
+            <?php
+        }
+        ?>
+        <?php
+        if (isset($_COOKIE['isSiteAdministrator']) && $_COOKIE['isSiteAdministrator'] == true) {
+            ?>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/">Admin</a>
+            </li>
+            <?php
+        }
+    ?>
+    ```
+
+    With this code to use our session ID:
+
+    ```
+    <?php
+        if (isset($_SESSION['isSiteAdministrator']) && $_SESSION['isSiteAdministrator'] == true) {
+            ?>
+            <li class="nav-item">
+                <a class="nav-link" href="/users/">Users</a>
+            </li>
+            <?php
+        }
+        ?>
+        <?php
+        if (isset($_SESSION['isSiteAdministrator']) && $_SESSION['isSiteAdministrator'] == true) {
+            ?>
+            <li class="nav-item">
+                <a class="nav-link" href="/admin/">Admin</a>
+            </li>
+            <?php
+        }
+    ?>
+    ```
+
+### Final Step
+
+It is very likely that there are other references to `_COOKIE`, in order to be sure that you have identified all locations that reference this value click Edit > Find in Files, and search for '_COOKIE'. We can then replace all instances of '_COOKIE' outside of the README.md file with '_SESSION'. This is called refactoring.
 ## For Credit
 
 Congratulations on implementing secure session management! Take a screenshot of you accessing the admin panel as your own personal user account, as well as your updated code from the `login.php` and `logout.php`.
