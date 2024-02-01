@@ -36,9 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $email = $conn->real_escape_string($_POST['email']);
                     $password = $conn->real_escape_string($_POST['password']);
 
-                    $password_hash = hash('sha256', $password . 'mysalty!');
 
-                    $query = "INSERT INTO users (username, first_name, last_name, email, password_hash) VALUES ('$username', '$first_name', '$last_name', '$email', '$password_hash')";
+                    $query = "INSERT INTO users (username, first_name, last_name, email, password) VALUES ('$username', '$first_name', '$last_name', '$email', '$password')";
                     $result = $conn->query($query);
 
 
