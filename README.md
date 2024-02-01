@@ -1,4 +1,4 @@
-# Week 5 | Sessions
+# Week 5 | Access Control
 
 Recall from lecture that web sessions are sequences of HTTP requests and responses associated with the same user. These sessions allow us to establish variables like privileges and local settings that will apply to every interaction the user has with the website. How we manage these sessions are extremely important when discussing cybersecurity as we need to ensure that authentication and authorization remain secure and locked down for each entity interacting with our service. In this lab, we will be looking at what insecure session management looks like, and how we can apply secure session management to our password manager to prevent attacks such as session hijacking!
 
