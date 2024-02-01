@@ -37,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
        
         $userFromDB = $result->fetch_assoc();
 
-        //$_COOKIE['authenticated'] = $username;
         setcookie('authenticated', $username, time() + 3600, '/');     
 
         if ($userFromDB['default_role_id'] == 1)

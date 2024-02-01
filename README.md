@@ -152,7 +152,12 @@ We can use `PHPSESSID` to manage the authentication and authorization for our we
         exit();
         ```
 
-2. Now, we can replace this with the more secure version using the `PHPSESSID`. Replace the line of code setting the `authenticated` cookie with the following line of code:
+2. Now, we can replace this with the more secure version using the `PHPSESSID`. Replace the following line of code:
+
+    ```
+    setcookie('authenticated', $username, time() + 3600, '/'); 
+    ```
+    With this line:
 
     ```
     $_SESSION['authenticated'] = $username;
@@ -188,6 +193,43 @@ We can use `PHPSESSID` to manage the authentication and authorization for our we
     ?>
     ```
 
+4. Next, in `logout.php`, replace the following lines of code in `logout.php`:
+
+    ```
+    unset($_COOKIE['authenticated']); 
+    setcookie('authenticated', '', time() - 3600, '/');
+    ```
+
+    With this single line to use our session id:
+
+    ```
+    unset($_SESSION['authenticated']);
+    ```
+
+5. Finally, we need to update our nav bar component to read the username from our session instead of the cookie. In `nav-bar.php`, update the following code:
+
+    ```
+    if (isset($_COOKIE['isSiteAdministrator']) && $_COOKIE['isSiteAdministrator'] == true) {
+        ?>
+        <li class="nav-item">
+            <a class="nav-link" href="/users/">Users</a>
+        </li>
+        <?php
+    }
+    ```
+
+    to use our session ID instead:
+
+    ```
+    if (isset($_COOKIE['isSiteAdministrator']) && $_SESSION['isSiteAdministrator'] == true) {
+        ?>
+        <li class="nav-item">
+            <a class="nav-link" href="/users/">Users</a>
+        </li>
+        <?php
+    }
+    ```
+
 ## Part 4: Breaking Authorization
 
 Now that we have locked down authentication, can users still access resources that they are not authorized to use? As we saw earlier, our web application partially handles authorization through the use of cookies.
@@ -203,15 +245,26 @@ Now that we have locked down authentication, can users still access resources th
 
 Clearly these cookies aren't working. We were able to implement secure authentication by using `PHPSESSID`, let's take a similar approach to Authorization!
 
-1. We need to also update `isSiteAdministrator` to use our session ID instead of a cookie. To do this, let's replace the code that sets this cookie with the following code:
+1. We need to also update `isSiteAdministrator` to use our session ID instead of a cookie. To do this, let's replace if check that sees if they are an administrator:
 
     ```
     if ($userFromDB['default_role_id'] == 1)
-        {        
-            $_SESSION['isSiteAdministrator'] = 1;               
-        }else{
-            unset($_SESSION['isSiteAdministrator']); 
-        }
+    {        
+        setcookie('isSiteAdministrator', true, time() + 3600, '/');                
+    }else{
+        unset($_COOKIE['isSiteAdministrator']); 
+        setcookie('isSiteAdministrator', '', -1, '/'); 
+    }
+    ```
+    with the following code that sets `isSiteAdministrator` key in our session:
+
+    ```
+    if ($userFromDB['default_role_id'] == 1)
+    {        
+        $_SESSION['isSiteAdministrator'] = 1;               
+    }else{
+        unset($_SESSION['isSiteAdministrator']); 
+    }
     ```
 
     When users visit our webpage however, they land on `index.php`, which checks if their cookie is set correctly. We need to update this so that it checks the session instead. 

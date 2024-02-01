@@ -1,5 +1,6 @@
 <?php
 
+include '../components/authenticate.php';
 
 $hostname = 'mysql-database';
 $username = 'user';
