@@ -65,7 +65,7 @@ We will be utilizing metasploit through a Docker container. In a "real" pen test
 
     ![metasploit contianer](/lab-writeup-imgs/metasploit_container.png)
 
-    Two things to take note of, the ASCII art will most likely be different, and your LHOST should be printed at the bottom of the terminal (highlight in red in the image above). This is the IP address of the docker container running metasploit. You should take note of this IP address as we will need to use it during the lab.
+    Two things to take note of, the ASCII art will most likely be different, and your LHOST should be printed at the bottom of the terminal (highlight in red in the image above). This is the IP address of the docker container running metasploit within the private docker network. This is **different** from your external IP address.
 
 
 ## Part 3: Crafting our Payload
