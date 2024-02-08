@@ -69,5 +69,3 @@ password: password!
 Congratulations on successfully setting up Docker! We will be using this for each lab assignment throughout the quarter. If you run into any issues or have any questions, please don't hesitate to reach out the the teaching team, we are here to help!
 
 Please refer to the canvas lab assignment page for the rubric and instructions on submitting the write up.
-
-TEST
