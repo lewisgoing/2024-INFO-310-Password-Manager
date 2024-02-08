@@ -1,17 +1,10 @@
 <?php
 
+//This order of load operations is very imporant 
 include '../components/authenticate.php';
-
-$hostname = 'mysql-database';
-$username = 'user';
-$password = 'supersecretpw';
-$database = 'password_manager';
-
-$conn = new mysqli($hostname, $username, $password, $database);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include '../components/loggly-logger.php';
+include '../components/database-connection.php';
+include '../components/authorization.php';
 
 // Fetch users, roles, and vaults from the database
 $queryUsers = "SELECT * FROM users";
@@ -27,16 +20,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $userId = $_POST['user_id'];
             $roleId = $_POST['role_id'];
             $vaultId = $_POST['vault_id'];
+            if (hasPermission('UPDATE', $vaultId)) {
 
-            // Perform the necessary database operations to manage user-role-vault relationships
-            // For example, you can insert, update, or delete records in the vault_permissions table
-            $query = "INSERT INTO vault_permissions (user_id, role_id, vault_id) VALUES ($userId, $roleId, $vaultId)";
-            $result = $conn->query($query);
+                // Perform the necessary database operations to manage user-role-vault relationships
+                // For example, you can insert, update, or delete records in the vault_permissions table
+                $query = "INSERT INTO vault_permissions (user_id, role_id, vault_id) VALUES ($userId, $roleId, $vaultId)";
+                $result = $conn->query($query);
 
-            if (!$result) {
-                die("Error managing user-role-vault relationship: " . $conn->error);
+                if (!$result) {
+                    die("Error managing user-role-vault relationship: " . $conn->error);
+                }
             }
-
             // Redirect to the current page after managing the relationship
             header("Location: {$_SERVER['PHP_SELF']}?vault_id=$vaultId");
             exit();
@@ -49,16 +43,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($_POST['action'] === 'deletePermission' && isset($_POST['deletePermissionId']) && isset($_POST['vault_id'])) {
             $permissionId = $_POST['deletePermissionId'];
             $vaultId = $_POST['vault_id'];
-          
+            if (hasPermission('UPDATE', $vaultId)) {
 
-            // Perform the necessary database operations to delete the permission
-            $queryDelete = "DELETE FROM vault_permissions WHERE permission_id = $permissionId";
-            $resultDelete = $conn->query($queryDelete);
+                // Perform the necessary database operations to delete the permission
+                $queryDelete = "DELETE FROM vault_permissions WHERE permission_id = $permissionId";
+                $resultDelete = $conn->query($queryDelete);
 
-            if (!$resultDelete) {
-                die("Error deleting permission. Query : " . $queryDelete . " Error : " . $conn->error);
+                if (!$resultDelete) {
+                    die("Error deleting permission. Query : " . $queryDelete . " Error : " . $conn->error);
+                }
             }
-
             // Redirect to the current page after deleting the permission
             header("Location: {$_SERVER['PHP_SELF']}?vault_id=$vaultId");
             exit();
@@ -178,9 +172,9 @@ if ($selectedVaultId) {
                                 $(document).ready(function () {
                                     // Attach click event to delete buttons
                                     $('.delete-btn').click(function () {
-                                        var deletePermissionId = $(this).data('delete-permission-id');                                        
+                                        var deletePermissionId = $(this).data('delete-permission-id');
                                         // Set values in the delete form
-                                        $('#deletePermissionId').val(deletePermissionId);                                        
+                                        $('#deletePermissionId').val(deletePermissionId);
                                         // // Submit the delete form
                                         // $('#deleteForm').submit();
                                     });

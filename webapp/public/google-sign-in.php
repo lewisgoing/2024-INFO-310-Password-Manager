@@ -92,7 +92,7 @@ if ($userInfo) {
     if ($resultCheckUser->num_rows > 0) {
         // User already exists, perform any additional actions if needed
        // echo "User with email $userEmail already exists.";
-       $_COOKIE['authenticated'] = $userName;
+       $_SESSION['authenticated'] = $userName;
        header("Location: index.php");
     } else {
         // User does not exist, insert into the users table
@@ -101,7 +101,7 @@ if ($userInfo) {
 
         if ($conn->query($sqlInsertUser) === TRUE) {
            // echo "New user inserted successfully.";
-           $_COOKIE['authenticated'] = $userName;
+           $_SESSION['authenticated'] = $userName;
            header("Location: index.php");
         } else {
             echo "Error: " . $sqlInsertUser . "<br>" . $conn->error;

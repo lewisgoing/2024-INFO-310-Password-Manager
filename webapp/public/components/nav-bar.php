@@ -9,7 +9,7 @@
         <ul class="navbar-nav ml-auto">
             <li class="nav-item active">
                 <a class="nav-link">
-                    <?php echo "Welcome " . $_COOKIE['authenticated'] ?>
+                    <?php echo "Welcome " . $_SESSION['authenticated'] ?>
                 </a>
             </li>
             <li class="nav-item active">
@@ -19,7 +19,7 @@
                 <a class="nav-link" href="/vaults/">Vaults</a>
             </li>
             <?php
-            if (isset($_COOKIE['isSiteAdministrator']) && $_COOKIE['isSiteAdministrator'] == true) {
+            if (isset($_SESSION['isSiteAdministrator']) && $_SESSION['isSiteAdministrator'] == true) {
                 ?>
                 <li class="nav-item">
                     <a class="nav-link" href="/users/">Users</a>
@@ -28,7 +28,7 @@
             }
             ?>
             <?php
-            if (isset($_COOKIE['isSiteAdministrator']) && $_COOKIE['isSiteAdministrator'] == true) {
+            if (isset($_SESSION['isSiteAdministrator']) && $_SESSION['isSiteAdministrator'] == true) {
                 ?>
                 <li class="nav-item">
                     <a class="nav-link" href="/admin/">Admin</a>

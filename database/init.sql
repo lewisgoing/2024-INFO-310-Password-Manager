@@ -114,7 +114,6 @@ VALUES
 INSERT INTO vault_permissions (permission_id, user_id, vault_id, role_id)
 VALUES
     -- Assigning users to the "Developers Vault"
-    (2, 1, 1, 3),  -- Username (Viewer)
     (3, 3, 1, 2),  -- Jane Doe (Editor)
     (4, 5, 1, 3),  -- Alice Smith (Viewer)
     (5, 6, 1, 3),  -- Bob Johnson (Viewer)

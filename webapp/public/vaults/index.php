@@ -1,20 +1,10 @@
 <?php
 
+//This order of load operations is very imporant 
 include '../components/authenticate.php';
 include '../components/loggly-logger.php';
-
-$hostname = 'mysql-database';
-$username = 'user';
-$password = 'supersecretpw';
-$database = 'password_manager';
-
-$conn = new mysqli($hostname, $username, $password, $database);
-
-if ($conn->connect_error) {
-    $logger->error("Connection failed: " . $conn->connect_error);
-    die('A fatal error occurred and has been logged.');
-    //die("Connection failed: " . $conn->connect_error);
-}
+include '../components/database-connection.php';
+include '../components/authorization.php';
 
 // Add Vault
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vaultName'])) {
@@ -35,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vaultName'])) {
 
     // We need to fetch the user_id based off the username in order to complete the permission insert, we are going to default to Owner for the role so we can hardcode that without looking it up
 
-    $user = $_COOKIE['authenticated'];
+    $user = $_SESSION['authenticated'];
     $queryFetchUserId = "SELECT user_id FROM users WHERE username = '$user'";
     $resultFetchUserId = $conn->query($queryFetchUserId);
 
@@ -44,23 +34,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vaultName'])) {
         $row = $resultFetchUserId->fetch_assoc();
         $userId = $row['user_id'];
         $roleId = 1;
-    
+
         // If user_id is found, insert the permission
         $queryInsertPermission = "INSERT INTO vault_permissions (user_id, vault_id, role_id) VALUES ($userId, $insertedVaultId, $roleId)";
         $resultInsertPermission = $conn->query($queryInsertPermission);
-    
+
         if (!$resultInsertPermission) {
-            $logger->error("Error adding permission, Query : " .  $queryInsertPermission . " Error Info : " . $conn->error);
-          //  die("Error adding permission, Query : " .  $queryInsertPermission . " Error Info : " . $conn->error);
+            $logger->error("Error adding permission, Query : " . $queryInsertPermission . " Error Info : " . $conn->error);
+            //  die("Error adding permission, Query : " .  $queryInsertPermission . " Error Info : " . $conn->error);
             die('A fatal error occurred while adding permission.');
         } else {
-            $logger->info( "Permission added successfully!");
+            $logger->info("Permission added successfully!");
         }
     } else {
         die("User with username '$user' not found.");
     }
 
-    $logger->info('Vault Added', ['vault' => $vaultName, 'added_by' => $_COOKIE['authenticated']]);
+    $logger->info('Vault Added', ['vault' => $vaultName, 'added_by' => $_SESSION['authenticated']]);
 
     // Redirect to the current page after adding the vault
     header("Location: {$_SERVER['PHP_SELF']}");
@@ -71,54 +61,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['vaultName'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editVaultName']) && isset($_POST['editVaultId'])) {
     $editVaultName = $_POST['editVaultName'];
     $editVaultId = $_POST['editVaultId'];
+    if (hasPermission('UPDATE', $editVaultId)) {
 
-    $query = "UPDATE vaults SET vault_name = '$editVaultName' WHERE vault_id = $editVaultId";
-    $result = $conn->query($query);
+        $query = "UPDATE vaults SET vault_name = '$editVaultName' WHERE vault_id = $editVaultId";
+        $result = $conn->query($query);
 
-    if (!$result) {
-        $logger->error("Error editing vault: " . $conn->error);
-        die('A fatal error occurred and has been logged.');
-        // die("Error editing vault: " . $conn->error);
+        if (!$result) {
+            $logger->error("Error editing vault: " . $conn->error);
+            die('A fatal error occurred and has been logged.');
+            // die("Error editing vault: " . $conn->error);
+        }
+
+        $logger->info('Vault Edited', ['vault_id' => $editVaultId, 'edited_by' => $_SESSION['authenticated']]);
+
+        // Redirect to the current page after editing the vault
+        header("Location: {$_SERVER['PHP_SELF']}");
+        exit();
     }
-    
-    $logger->info('Vault Edited', ['vault_id' => $editVaultId, 'edited_by' => $_COOKIE['authenticated']]);
-
-    // Redirect to the current page after editing the vault
-    header("Location: {$_SERVER['PHP_SELF']}");
-    exit();
 }
 
 // Delete Vault
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['deleteVaultId']) && !empty($_POST['deleteVaultId'])) {
+
     $deleteVaultId = $_POST['deleteVaultId'];
+    if (hasPermission('DELETE', $deleteVaultId)) {
+        $query = "DELETE FROM vaults WHERE vault_id = $deleteVaultId";
 
-    $query = "DELETE FROM vaults WHERE vault_id = $deleteVaultId";
+        $result = $conn->query($query);
 
-    $result = $conn->query($query);
+        if (!$result) {
+            $logger->error("Error deleting vault: " . $conn->error);
+            die('A fatal error occurred and has been logged.');
+            //die("Error deleting vault: " . $conn->error);
+        }
 
-    if (!$result) {
-        $logger->error("Error deleting vault: " . $conn->error);
-        die('A fatal error occurred and has been logged.');
-        //die("Error deleting vault: " . $conn->error);
+        $logger->info('Vault Deleted', ['vault_id' => $deleteVaultId, 'deleted_by' => $_SESSION['authenticated']]);
+
+        // Redirect to the current page after deleting the vault
+        header("Location: {$_SERVER['PHP_SELF']}");
+        exit();
     }
-
-    $logger->info('Vault Deleted', ['vault_id' => $deleteVaultId, 'deleted_by' => $_COOKIE['authenticated']]);
-
-    // Redirect to the current page after deleting the vault
-    header("Location: {$_SERVER['PHP_SELF']}");
-    exit();
 }
 
 // Retrieve vaults from the database
-if($_COOKIE['isSiteAdministrator'] == true){
-    $query =  "SELECT vaults.vault_id, vaults.vault_name
+if ($_SESSION['isSiteAdministrator'] == true) {
+    $query = "SELECT vaults.vault_id, vaults.vault_name
                FROM vaults";
-}else{
+} else {
     $query = "SELECT vaults.vault_id, vaults.vault_name
     FROM vaults, vault_permissions, users
     WHERE vaults.vault_id = vault_permissions.vault_id
     AND vault_permissions.user_id = users.user_id
-    AND users.username = '" . $_COOKIE['authenticated'] . "'";
+    AND users.username = '" . $_SESSION['authenticated'] . "'";
 }
 
 
@@ -142,7 +136,7 @@ if (!$result) {
 
 <body>
 
-<?php include '../components/nav-bar.php';?>
+    <?php include '../components/nav-bar.php'; ?>
 
     <div class="container mt-4">
         <h2>Password Vaults</h2>
@@ -173,8 +167,9 @@ if (!$result) {
                                     <?php echo $row['vault_name']; ?>
                                 </td>
                                 <td>
-                                    <a href="vault_details.php?vault_id=<?php echo $row['vault_id']; ?>" class="btn btn-primary btn-sm" role="button" aria-disabled="true">View Vault</a>
-                                
+                                    <a href="vault_details.php?vault_id=<?php echo $row['vault_id']; ?>"
+                                        class="btn btn-primary btn-sm" role="button" aria-disabled="true">View Vault</a>
+
                                     <!-- Edit button to open a modal for editing a vault -->
                                     <button class="btn btn-warning btn-sm edit-btn" data-toggle="modal"
                                         data-target="#editVaultModal" data-vault-name="<?php echo $row['vault_name']; ?>"
@@ -184,7 +179,7 @@ if (!$result) {
                                     <button class="btn btn-danger btn-sm delete-btn" data-toggle="modal"
                                         data-target="#deleteVaultModal" data-vault-name="<?php echo $row['vault_name']; ?>"
                                         data-vault-id="<?php echo $row['vault_id']; ?>">Delete</button>
-                                </td>   
+                                </td>
                             </tr>
                         <?php endwhile; ?>
                     </tbody>

@@ -1,20 +1,10 @@
 <?php
 
 include '../components/authenticate.php';
+include '../components/authorization.php';
 include '../components/loggly-logger.php';
+include '../components/database-connection.php';
 
-$hostname = 'mysql-database';
-$username = 'user';
-$password = 'supersecretpw';
-$database = 'password_manager';
-
-$conn = new mysqli($hostname, $username, $password, $database);
-
-if ($conn->connect_error) {
-    $logger->error("Connection failed: " . $conn->connect_error);
-    die('A fatal error occurred and has been logged.');
-    // die("Connection failed: " . $conn->connect_error);
-}
 
 // Fetch users from the database
 $queryUsers = "SELECT * FROM users";
@@ -48,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // die("Error adding user: " . $conn->error);
                     }
 
-                      $logger->info('New User Added', ['username' => $username, 'added_by' => $_COOKIE['authenticated']]);
+                      $logger->info('New User Added', ['username' => $username, 'added_by' => $_SESSION['authenticated']]);
                       // Redirect to the current page after handling a POST
                       header("Location: {$_SERVER['PHP_SELF']}");
                       exit();
@@ -73,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // die("Error editing user: " . $conn->error);
                     }
 
-                    $logger->info('User Edited', ['user_id' => $user_id, 'edited_by' => $_COOKIE['authenticated']]);
+                    $logger->info('User Edited', ['user_id' => $user_id, 'edited_by' => $_SESSION['authenticated']]);
                     header("Location: {$_SERVER['PHP_SELF']}");
                     exit();
                 }

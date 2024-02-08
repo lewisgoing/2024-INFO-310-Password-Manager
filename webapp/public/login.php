@@ -37,14 +37,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
        
         $userFromDB = $result->fetch_assoc();
 
-        setcookie('authenticated', $username, time() + 3600, '/');     
+        $_SESSION['authenticated'] = $username;
+        
 
         if ($userFromDB['default_role_id'] == 1)
         {        
+            $_SESSION['isSiteAdministrator'] = true;
             setcookie('isSiteAdministrator', true, time() + 3600, '/');                
-        }else{
-            unset($_COOKIE['isSiteAdministrator']); 
-            setcookie('isSiteAdministrator', '', -1, '/'); 
+        }else if(isset($_SESSION['isSiteAdministrator'])){            
+           unset($_SESSION['isSiteAdministrator']);            
         }
         header("Location: index.php");
         exit();

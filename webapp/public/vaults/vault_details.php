@@ -1,23 +1,10 @@
 <?php
 
+//This order of load operations is very imporant 
 include '../components/authenticate.php';
-
 include '../components/loggly-logger.php';
-// Replace with your database connection details
-$hostname = 'mysql-database';
-$username = 'user';
-$password = 'supersecretpw';
-$database = 'password_manager';
-
-include '../components/loggly-logger.php';
-
-$conn = new mysqli($hostname, $username, $password, $database);
-
-if ($conn->connect_error) {
-    $logger->error("Connection failed: " . $conn->connect_error);
-    die('A fatal error occurred and has been logged.');
-    // die("Connection failed: " . $conn->connect_error);
-}
+include '../components/database-connection.php';
+include '../components/authorization.php';
 
 $uploadDir = './uploads/'; // Specify the directory where you want to save the uploaded files
 
@@ -30,36 +17,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['addUsername']) && iss
     $addNotes = $_POST['addNotes'];
     $vaultId = $_POST['vaultId'];
 
-    // Check if a file is uploaded
-    if (!empty($_FILES['file']['name'])) {
-        $uploadFile = $uploadDir . basename($_FILES['file']['name']);
+    if (hasPermission('UPDATE', $vaultId)) {
 
-        if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadFile)) {
-            $filePath = "'" . $uploadFile . "'";
+        // Check if a file is uploaded
+        if (!empty($_FILES['file']['name'])) {
+            $uploadFile = $uploadDir . basename($_FILES['file']['name']);
+
+            if (move_uploaded_file($_FILES['file']['tmp_name'], $uploadFile)) {
+                $filePath = "'" . $uploadFile . "'";
+            } else {
+                // Handle file upload error
+                $logger->error("Error uploading file.");
+                die('Error uploading file.');
+            }
         } else {
-            // Handle file upload error
-            $logger->error("Error uploading file.");
-            die('Error uploading file.');
+            // If no file is uploaded, set the file path to NULL
+            $filePath = "NULL";
         }
-    } else {
-        // If no file is uploaded, set the file path to NULL
-        $filePath = "NULL";
-    }
 
-    $queryAddPassword = "INSERT INTO vault_passwords (vault_id, username, website, password, notes, file_path) 
+        $queryAddPassword = "INSERT INTO vault_passwords (vault_id, username, website, password, notes, file_path) 
                      VALUES ($vaultId, '$addUsername', '$addWebsite', '$addPassword', '$addNotes', $filePath)";
 
-    $resultAddPassword = $conn->query($queryAddPassword);
+        $resultAddPassword = $conn->query($queryAddPassword);
 
-    if (!$resultAddPassword) {
-        $logger->error("Error adding password: " . $conn->error);
-        die('A fatal error occurred and has been logged.');
-        // die("Error adding password: " . $conn->error);
+        if (!$resultAddPassword) {
+            $logger->error("Error adding password: " . $conn->error);
+            die('A fatal error occurred and has been logged.');
+            // die("Error adding password: " . $conn->error);
+        }
+        // Redirect to the current page after adding the password
     }
-
-    $logger->info("Password added to Vault $vaultId"); // Log for adding password.
-
-    // Redirect to the current page after adding the password
     header("Location: {$_SERVER['PHP_SELF']}?vault_id=$vaultId");
     exit();
 }
@@ -73,52 +60,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['editPasswordId']) && 
     $editPasswordId = $_POST['editPasswordId'];
     $vaultId = $_POST['vaultId'];
 
-    // Check if a new file is uploaded
-    if (!empty($_FILES['editFile']['name'])) {
-        $updateFile = $uploadDir . basename($_FILES['editFile']['name']);
+    if (hasPermission('UPDATE', $vaultId)) {
+        // Check if a new file is uploaded
+        if (!empty($_FILES['editFile']['name'])) {
+            $updateFile = $uploadDir . basename($_FILES['editFile']['name']);
 
-        if (move_uploaded_file($_FILES['editFile']['tmp_name'], $updateFile)) {
-            $filePath = $updateFile;
+            if (move_uploaded_file($_FILES['editFile']['tmp_name'], $updateFile)) {
+                $filePath = $updateFile;
+            } else {
+                $logger->error("Error uploading file");
+                die('Error uploading file.');
+            }
         } else {
-            $logger->error("Error uploading file");
-            die('Error uploading file.');
-        }
-    } else {
-        // If no new file is uploaded, preserve the existing file path
-        $queryGetFilePath = "SELECT file_path FROM vault_passwords WHERE password_id = $editPasswordId";
-        $resultGetFilePath = $conn->query($queryGetFilePath);
+            // If no new file is uploaded, preserve the existing file path
+            $queryGetFilePath = "SELECT file_path FROM vault_passwords WHERE password_id = $editPasswordId";
+            $resultGetFilePath = $conn->query($queryGetFilePath);
 
-        if ($resultGetFilePath && $resultGetFilePath->num_rows > 0) {
-            $row = $resultGetFilePath->fetch_assoc();
-            $existingFilePath = $row['file_path'];
-            $filePath = $existingFilePath;
+            if ($resultGetFilePath && $resultGetFilePath->num_rows > 0) {
+                $row = $resultGetFilePath->fetch_assoc();
+                $existingFilePath = $row['file_path'];
+                $filePath = $existingFilePath;
+            } else {
+                // Handle error if existing file path retrieval fails
+                $logger->error("Error retrieving existing file path.");
+                die('Error retrieving existing file path.');
+            }
+        }
+
+        // Check if filePath is NULL to properly format it in the query
+        if ($filePath === "NULL" || $filePath === null) {
+            $filePathSQL = "NULL";
         } else {
-            // Handle error if existing file path retrieval fails
-            $logger->error("Error retrieving existing file path.");
-            die('Error retrieving existing file path.');
+            $filePathSQL = "'" . $filePath . "'";
         }
-    }
 
-    // Check if filePath is NULL to properly format it in the query
-    if ($filePath === "NULL" || $filePath === null) {
-        $filePathSQL = "NULL";
-    } else {
-        $filePathSQL = "'" . $filePath . "'";
-    }
-
-    $queryEditPassword = "UPDATE vault_passwords 
+        $queryEditPassword = "UPDATE vault_passwords 
                         SET username = '$editUsername', website = '$editWebsite', 
                         password = '$editPassword', notes = '$editNotes', file_path = $filePathSQL
                         WHERE password_id = $editPasswordId";
 
-    $resultEditPassword = $conn->query($queryEditPassword);
+        $resultEditPassword = $conn->query($queryEditPassword);
 
-    if (!$resultEditPassword) {
-        $logger->error("Error updating password: " . $conn->error);
-        die('A fatal error occurred and has been logged. File: ' . $filePathSQL . 'Query: ' . $queryEditPassword . ' Error: ' . $conn->error);
+        if (!$resultEditPassword) {
+            $logger->error("Error updating password: " . $conn->error);
+            die('A fatal error occurred and has been logged. File: ' . $filePathSQL . 'Query: ' . $queryEditPassword . ' Error: ' . $conn->error);
+        }
     }
-
-    $logger->info("Password $editPasswordId has been modified."); // Log for editing password.
 
     // Redirect to the current page after updating the password
     header("Location: {$_SERVER['PHP_SELF']}?vault_id=$vaultId");
@@ -131,17 +118,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['deletePasswordId']) &
     $deletePasswordId = $_POST['deletePasswordId'];
     $vaultId = $_POST['vaultId'];
 
-    $queryDeletePassword = "DELETE FROM vault_passwords WHERE password_id = $deletePasswordId";
-    $resultDeletePassword = $conn->query($queryDeletePassword);
+    if (hasPermission('UPDATE', $vaultId)) {
 
-    if (!$resultDeletePassword) {
-        $logger->error("Error deleting password: " . $conn->error);
-        die('A fatal error occurred and has been logged.');
-        // die("Error deleting password: " . $conn->error);
+        $queryDeletePassword = "DELETE FROM vault_passwords WHERE password_id = $deletePasswordId";
+        $resultDeletePassword = $conn->query($queryDeletePassword);
+
+        if (!$resultDeletePassword) {
+            $logger->error("Error deleting password: " . $conn->error);
+            die('A fatal error occurred and has been logged.');
+            // die("Error deleting password: " . $conn->error);
+        }
     }
-
-    $logger->info("Password $deletePasswordId has been deleted from vault $vaultId"); // Log for deleting password.
-
     // Redirect to the current page after deleting the password
     header("Location: {$_SERVER['PHP_SELF']}?vault_id=$vaultId");
     exit();
@@ -168,21 +155,25 @@ if (!$resultPasswords) {
     die("Query failed: " . $conn->error);
 }
 
-$queryVaultOwner = "SELECT *
+$isVaultOwner = 0;
+
+if (isset($_SESSION['isSiteAdministrator']) && $_SESSION['isSiteAdministrator'] == true) {
+    $isVaultOwner = true;
+} else {
+
+    $queryVaultOwner = "SELECT *
                     FROM vault_permissions, users
                     WHERE vault_permissions.vault_id = $vaultId
                     AND vault_permissions.role_id = 1
                     AND vault_permissions.user_id = users.user_id
-                    AND users.username = '" . $_COOKIE['authenticated'] . "'";
+                    AND users.username = '" . $_SESSION['authenticated'] . "'";
 
-$resultIsOwner = $conn->query($queryVaultOwner);
+    $resultIsOwner = $conn->query($queryVaultOwner);
 
-$isVaultOwner = 0;
-
-if ($resultIsOwner->num_rows > 0) {   
-    $isVaultOwner = true;
+    if ($resultIsOwner->num_rows > 0) {
+        $isVaultOwner = true;
+    }
 }
-
 
 
 // Handle file deletion
@@ -190,39 +181,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['deleteFilePasswordId'
     $deleteFilePasswordId = $_POST['deleteFilePasswordId'];
     $vaultId = $_POST['deleteFileVaultId'];
 
-    // Retrieve the file path from the database using the password id
-    $queryGetFilePath = "SELECT file_path FROM vault_passwords WHERE password_id = $deleteFilePasswordId";
-    $resultGetFilePath = $conn->query($queryGetFilePath);
+    if (hasPermission('UPDATE', $vaultId)) {
 
-    if ($resultGetFilePath && $resultGetFilePath->num_rows > 0) {
-        $row = $resultGetFilePath->fetch_assoc();
-        $filePathToDelete = $row['file_path'];
 
-        // Delete the file from the server
-        if ($filePathToDelete && file_exists($filePathToDelete)) {
-            if (unlink($filePathToDelete)) {
-                // File deleted successfully
-                // Now update the file path in the database to NULL
-                $queryUpdateFilePath = "UPDATE vault_passwords SET file_path = NULL WHERE password_id = $deleteFilePasswordId";
-                $resultUpdateFilePath = $conn->query($queryUpdateFilePath);
+        // Retrieve the file path from the database using the password id
+        $queryGetFilePath = "SELECT file_path FROM vault_passwords WHERE password_id = $deleteFilePasswordId";
+        $resultGetFilePath = $conn->query($queryGetFilePath);
 
-                if (!$resultUpdateFilePath) {
-                    $logger->error("Error updating file path after deletion: " . $conn->error);
-                    die('A fatal error occurred and has been logged.');
+        if ($resultGetFilePath && $resultGetFilePath->num_rows > 0) {
+            $row = $resultGetFilePath->fetch_assoc();
+            $filePathToDelete = $row['file_path'];
+
+            // Delete the file from the server
+            if ($filePathToDelete && file_exists($filePathToDelete)) {
+                if (unlink($filePathToDelete)) {
+                    // File deleted successfully
+                    // Now update the file path in the database to NULL
+                    $queryUpdateFilePath = "UPDATE vault_passwords SET file_path = NULL WHERE password_id = $deleteFilePasswordId";
+                    $resultUpdateFilePath = $conn->query($queryUpdateFilePath);
+
+                    if (!$resultUpdateFilePath) {
+                        $logger->error("Error updating file path after deletion: " . $conn->error);
+                        die('A fatal error occurred and has been logged.');
+                    }
+                } else {
+                    $logger->error("Error deleting file: Could not unlink file.");
+                    die('A fatal error occurred while deleting the file.');
                 }
             } else {
-                $logger->error("Error deleting file: Could not unlink file.");
-                die('A fatal error occurred while deleting the file.');
+                $logger->error("Error deleting file: File does not exist.");
+                die('The file to be deleted does not exist.');
             }
         } else {
-            $logger->error("Error deleting file: File does not exist.");
-            die('The file to be deleted does not exist.');
+            $logger->error("Error deleting file: File path not found.");
+            die('The file path associated with the password was not found.');
         }
-    } else {
-        $logger->error("Error deleting file: File path not found.");
-        die('The file path associated with the password was not found.');
     }
-
     // Redirect to the current page after deleting the file
     header("Location: {$_SERVER['PHP_SELF']}?vault_id=$vaultId");
     exit();
@@ -254,10 +248,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['deleteFilePasswordId'
         <button type="button" class="btn btn-primary mb-2" data-toggle="modal" data-target="#addPasswordModal">
             Add Password
         </button>
-        <?php if($isVaultOwner): ?>
-            <a href="./vault_permissions.php?vault_id=<?php echo $vaultId ?>" class="btn btn-warning mb-2"  > Edit Vault Permissons </a>        
+        <?php if ($isVaultOwner): ?>
+            <a href="./vault_permissions.php?vault_id=<?php echo $vaultId ?>" class="btn btn-warning mb-2"> Edit Vault
+                Permissons </a>
         <?php endif; ?>
-                 
+
         <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Search for passwords..."
             class="form-control mb-3">
         <table class="table table-bordered" id="passwordTable">
@@ -303,11 +298,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['deleteFilePasswordId'
                             <?php if (!empty($rowPassword['file_path'])): ?>
                                 <a href="download_file.php?file=<?php echo urlencode($rowPassword['file_path']); ?>&vault_id=<?php echo urlencode($vaultId); ?>"
                                     target="_blank">Download File</a>
-                                    <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-                                        <input type="hidden" name="deleteFilePasswordId" value="<?php echo $rowPassword['password_id']; ?>">
-                                        <input type="hidden" name="deleteFileVaultId" value="<?php echo $vaultId; ?>">
-                                        <button type="submit" name="deleteFileSubmit" class="btn btn-danger btn-sm">Delete File</button>
-                                    </form>
+                                <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
+                                    <input type="hidden" name="deleteFilePasswordId"
+                                        value="<?php echo $rowPassword['password_id']; ?>">
+                                    <input type="hidden" name="deleteFileVaultId" value="<?php echo $vaultId; ?>">
+                                    <button type="submit" name="deleteFileSubmit" class="btn btn-danger btn-sm">Delete
+                                        File</button>
+                                </form>
                             <?php endif; ?>
                         </td>
                     </tr>
