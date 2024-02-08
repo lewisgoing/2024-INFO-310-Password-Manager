@@ -384,5 +384,3 @@ It is very likely that there are other references to `_COOKIE`, in order to be s
 ## For Credit
 
 Congratulations on implementing secure session management! Take a screenshot of you accessing the admin panel as your own personal user account, as well as your updated code from the `login.php` and `logout.php`.
-
-Test
