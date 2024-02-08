@@ -35,8 +35,21 @@ When we create new user accounts, add passwords, and upload files, these are all
 
 It may also be more beneficial to run `start.py` and `stop.py` rather than the `redeploy.py` script as these will not delete any data we have added.
 
+## Part 1: Planning our Attack
+Some helpful definitions to recall from lecture are:
+- `Vulnerability`: A weakness which can be exploited by a threat actor, such as an attacker.
+- `Exploit`: A piece of code written to take advantage of a particular vulnerability.
+- `Payload`: A piece of code to be executed through said exploit on a specific target.
+- `Target`: A system being exploited and that will run the payload.
 
-## Part 1: Setting up Metasploit.
+In this lab, we will be crafting a payload to take advantage of a vulnerability on the target machine.
+
+1. We need to identify a vulnerability. How can we get a piece of code onto our password manager?
+    - Note that this should also be a place where we can **execute** the payload. We need to be able to run our code once we somehow get it onto our target machine.
+
+Once we have identified our vulnerability, we can begin crafting our payload!
+
+## Part 2: Setting up Metasploit
 
 Metasploit is a framework that allows penetration testers to identify, exploit, and validate vulnerabilities in a system. It includes an extensive set of tools specifically for penetration testing. We can use the tools to generate payloads that will allow us to easily attack a system.
 
@@ -55,7 +68,7 @@ We will be utilizing metasploit through a Docker container. In a "real" pen test
     Two things to take note of, the ASCII art will most likely be different, and your LHOST should be printed at the bottom of the terminal (highlight in red in the image above). This is the IP address of the docker container running metasploit. You should take note of this IP address as we will need to use it during the lab.
 
 
-## Part 2: Crafting our Payload
+## Part 3: Crafting our Payload
 
 As mentioned above, metasploit comes with a suite of tools for us to use for pentesting and offensive security purposes. One of those tools being msfvenom. Msfvenom lets us generate customized payloads for our specific attack. We will be using msfvenom to easily craft the payload we will be using in this lab!
 
@@ -81,9 +94,7 @@ The payload we will be crafting will be built off of the `meterpreter` payload. 
 
     - Note that the payload will have a comment tag at the beginning. This is to ensure that the payload does not accidentally execute! We can remove this before saving so that the payload will run on our target machine.
 
-3. Now, we need to somehow get this payload onto our victim's machine. Can you figure out a way to do this using their password manager?
-
-## Part 3: Setting up our attacking machine
+## Part 4: Setting up our attacking machine
 1. To select this payload, run the following command in the msfconsole container:
 
     ```
@@ -109,7 +120,7 @@ The payload we will be crafting will be built off of the `meterpreter` payload. 
     exploit
     ```
 
-## Part 3: Attacking the Password Manager >:)
+## Part 5: Attacking the Password Manager >:)
 
 By now, you have the service listening within your metasploit container and have successfully placed the payload on the target's machine.
 
