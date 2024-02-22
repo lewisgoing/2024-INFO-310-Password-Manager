@@ -141,9 +141,9 @@ Choose any of the following activities in order to earn 5 points to complete for
 
 - .5 pt Find a way to retrieve all VAULT passwords from the database.
 
-- 2 pt Create a false pop-up asking your victim for confidential information whenever they access a vault.
+- 1 pt Craft a link to your vault that when opened will do something... nefarious >:)
 
-- 2 pt Craft a link to your vault that when opened will do something... nefarious >:)
+- 2 pt Create a false pop-up asking your victim for confidential information whenever they access a vault.
 
 - 2 pt Patch the vulnerability that allows logging in without credentials!
 
