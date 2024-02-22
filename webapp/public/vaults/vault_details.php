@@ -137,23 +137,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['deletePasswordId']) &
 // Retrieve vault information
 $vaultId = isset($_GET['vault_id']) ? $_GET['vault_id'] : 0;
 
-$query = "SELECT vault_name FROM vaults WHERE vault_id = $vaultId";
-$result = $conn->query($query);
+// $query = "SELECT vault_name FROM vaults WHERE vault_id = $vaultId";
+// $result = $conn->query($query);
 
-if (!$result) {
-    die("Query failed: " . $conn->error);
-}
+// if (!$result) {
+//     die("Query failed: " . $conn->error);
+// }
 
-$row = $result->fetch_assoc();
-$vaultName = $row['vault_name'];
+// $row = $result->fetch_assoc();
+// $vaultName = $row['vault_name'];
 
 // Retrieve passwords for the vault
-$queryPasswords = "SELECT * FROM vault_passwords WHERE vault_id = $vaultId";
+$queryPasswords = "SELECT * 
+                   FROM vault_passwords, vaults
+                   WHERE vault_passwords.vault_id = vaults.vault_id
+                   AND vaults.vault_id = $vaultId";
+
+
 $resultPasswords = $conn->query($queryPasswords);
 
 if (!$resultPasswords) {
     die("Query failed: " . $conn->error);
 }
+
+$firstRow = $resultPasswords->fetch_assoc();
+$vaultName = $firstRow['vault_name'];
+
 
 $isVaultOwner = 0;
 
