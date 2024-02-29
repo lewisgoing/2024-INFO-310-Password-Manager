@@ -73,13 +73,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (isset($_POST['user_id'])) {
                     $user_id = $_POST['user_id'];
 
-                    $query = "DELETE FROM users WHERE user_id=$user_id";
+                    $query = "DELETE FROM users WHERE user_id= $user_id";
+
                     $result = $conn->query($query);
 
                     if (!$result) {
-                        $logger->error("Error deleting user: " . $conn->error);
-                        die('A fatal error occurred and has been logged.');
-                        // die("Error deleting user: " . $conn->error);
+
+                        die("Error deleting user with query : " .  $query . " Error : " . $conn->error);
+                        // $logger->error("Error deleting user: " . $conn->error);
+                        // die('The following error occure when deleting a user.');
+                        // 
                     }
                     $logger->info('User Deleted', ['username' => $username, 'deleted_by' => $_f['authenticated']]);
 
@@ -184,7 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Edit
                     </button>
                     <!-- Delete button to open a modal for deleting a user -->
-                    <button class="btn btn-danger btn-sm delete-btn" data-toggle="modal" data-user_id="<?php echo $user['user_id']; ?>" data-target="#deleteUserModal">
+                    <button class="btn btn-danger btn-sm delete-btn" data-toggle="modal" data-userid="<?php echo $user['user_id']; ?>" data-target="#deleteUserModal">
                         Delete
                     </button>
                 </td>
@@ -287,7 +290,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <p>Are you sure you want to delete this user?</p>
                 <!-- Add your form for deleting a user here -->
                 <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-                    <input type="hidden" name="action" value="delete_user">
+                    <input type="hidden" name="action" value="delete_user">                    
                     <input type="hidden" name="user_id" id="deleteUserId" value="">
                     <button type="submit" class="btn btn-danger">Delete User</button>
                 </form>

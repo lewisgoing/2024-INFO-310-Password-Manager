@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class TestProperLogin():
+  
   def setup_method(self, method):
     self.driver = webdriver.Chrome()
     self.vars = {}    
