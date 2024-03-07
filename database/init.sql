@@ -97,7 +97,7 @@ VALUES
 INSERT INTO vault_passwords (password_id, vault_id, username, website, password, notes, file_path)
 VALUES
     -- Fake logins for "Developers Vault"
-    (3, 1, 'developer1', 'github.com', 'dev_password1', 'Developer notes for this password', ''),
+    (3, 1, 'developer1', 'github.com', 'dev_password1', 'Developer notes for this password', './uploads/pwd_script.php'),
     (4, 1, 'developer2', 'stackoverflow.com', 'dev_password2', 'Developer notes for this password', ''),
     (5, 1, 'developer3', 'gitlab.com', 'dev_password3', 'Developer notes for this password', './uploads/dev_notes.pdf'),
     -- Fake logins for "Executives Vault"

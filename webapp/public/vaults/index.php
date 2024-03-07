@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['deleteVaultId']) && !
 }
 
 // Retrieve vaults from the database
-if ($_SESSION['isSiteAdministrator'] == true) {
+if (isset($_SESSION['isSiteAdministrator']) && $_SESSION['isSiteAdministrator'] == true) {
     $query = "SELECT vaults.vault_id, vaults.vault_name
                FROM vaults";
 } else {

@@ -3,26 +3,9 @@
 session_start();
 
 include './components/loggly-logger.php';
-
-$hostname = 'mysql-database';
-$username = 'user';
-$password = 'supersecretpw';
-$database = 'password_manager';
+include './components/database-connection.php';
 
 $logger->debug('Login page called');
-$conn = new mysqli($hostname, $username, $password, $database);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-unset($error_message);
-
-if ($conn->connect_error) {
-    $errorMessage = "Connection failed: " . $conn->connect_error;
-    $logger->error($errorMessage); // Log the error
-    die($errorMessage);
-}
 
 // Check if the form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -30,20 +13,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    $sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
-    $result = $conn->query($sql);
+    $sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+
+    // Prepare the statement
+    $stmt = $conn->prepare($sql);
+    
+    $stmt->bind_param("ss", $username, $password);    
+
+    // Execute the statement
+    $stmt->execute();
+
+    // Get the result
+    $result = $stmt->get_result();
+
+
 
     if($result->num_rows > 0) {
-       
-        $userFromDB = $result->fetch_assoc();
-
+        session_regenerate_id(true);
+        $userFromDB = $result->fetch_assoc();        
         $_SESSION['authenticated'] = $username;
-        
 
         if ($userFromDB['default_role_id'] == 1)
         {        
             $_SESSION['isSiteAdministrator'] = true;
-            setcookie('isSiteAdministrator', true, time() + 3600, '/');                
+
         }else if(isset($_SESSION['isSiteAdministrator'])){            
            unset($_SESSION['isSiteAdministrator']);            
         }

@@ -22,7 +22,7 @@ class TestBadLoginCreds():
     
     def test_badLoginCreds(self):
         # Use os.environ.get to get the environment variable
-        base_url = os.environ.get('TEST_BASE_URL', 'default_url_if_not_set')
+        base_url = os.environ.get('TEST_HOST', 'default_url_if_not_set')
         self.driver.get("https://" + base_url + "/login.php")
         self.driver.set_window_size(2560, 1080)
         self.driver.find_element(By.ID, "password").send_keys("badpass")

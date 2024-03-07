@@ -3,6 +3,7 @@ import pytest
 import time
 import json
 import os
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
@@ -13,19 +14,24 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from dotenv import load_dotenv
 load_dotenv()
 
-base_url = os.environ.get('TEST_HOST')
-
-class TestHttps():
+class TestSQLInjectionFailedLogin():
   def setup_method(self, method):
     self.driver = webdriver.Chrome()
     self.vars = {}
+    self.host_url = os.getenv("TEST_HOST")
   
   def teardown_method(self, method):
     self.driver.quit()
   
-  def test_https(self):
+  def test_untitled(self):
+    base_url = os.environ.get('TEST_HOST', 'default_url_if_not_set')
     self.driver.get("https://" + base_url + "/login.php")
-    self.driver.set_window_size(1183, 1184)
-    elements = self.driver.find_elements(By.CSS_SELECTOR, ".text-center:nth-child(1)")
-    assert len(elements) > 0
+    self.driver.set_window_size(1008, 1080)
+    self.driver.find_element(By.ID, "username").click()
+    self.driver.find_element(By.ID, "username").send_keys("barf")
+    self.driver.find_element(By.ID, "password").send_keys("\' OR 1 = 1; -- ")
+    self.driver.find_element(By.CSS_SELECTOR, ".container").click()
+    self.driver.find_element(By.CSS_SELECTOR, ".btn-primary").click()    
+    elements = self.driver.find_elements(By.LINK_TEXT, "Welcome barf")
+    assert len(elements) == 0
   
